@@ -111,13 +111,12 @@ public class restore : MonoBehaviour
                 if(!GeometryUtility.TestPlanesAABB(planes, bounds))
                 {
                     currentHidWall.Add(w);
-                    print("ADded");
+                    
                 }
                     
             }
             
-            foreach(wall w in currentHidWall) {
-                print(w); }
+            
            
             return currentHidWall ;
         }
@@ -141,7 +140,7 @@ public class restore : MonoBehaviour
             HashSet<wall> curentHidWalls = getHiddenWalls();
 
            
-            print(blindWalls.Count);
+            
             if (!blindWalls.SetEquals(curentHidWalls))
             {
                 print("ENTROO");
