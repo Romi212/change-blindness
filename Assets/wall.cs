@@ -23,7 +23,7 @@ public class wall : MonoBehaviour
     public void Initialize()
     {
         Vector3 scale = this.transform.localScale;
-        originalScale = scale.z;
+        originalScale = 1.5f;
         orientation = this.transform.right;
     }
     public void RestoreScale(float d)
@@ -56,8 +56,14 @@ public class wall : MonoBehaviour
        // RestoreScale(scaleCoficient);
         this.transform.position -= (movevector);
         
+        
     }
-
+    public float RestoreOriginalScale(float d) {
+        float currentScale = this.transform.localScale.z;
+        float diference = originalScale - currentScale;
+        RestoreScale(diference);
+        return diference;
+    }
     public void moveWall(Vector3 dir)
     {
         this.transform.position -= dir;
@@ -93,5 +99,17 @@ public class wall : MonoBehaviour
     public Bounds getBounds()
     {
         return GetComponent<Collider>().bounds;
+    }
+
+    public bool isScaled()
+    {
+        float currentScale = this.transform.localScale.z;
+        return currentScale == originalScale;
+    }
+
+    public float getScaleDiference()
+    {
+        float currentScale = this.transform.localScale.z;
+        return originalScale - currentScale;
     }
 }

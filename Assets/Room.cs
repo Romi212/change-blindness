@@ -121,55 +121,64 @@ public HashSet<wall> getHiddenWalls()
 
     return currentHidWall;
 }
-public void moveWalls(Vector3 dir)
+public void moveWalls(Vector3 dir, float d)
 {
+    dir = dir* d;
     foreach (wall w in blindWalls)
 
     {
+            Vector3 orientation = new Vector3(0, 0, 1);
 
             if (w == rightWall || w == leftWall)
-            {
-                w.moveWall(new Vector3(dir.x, 0, 0));
-                Vector3 positionThis = w.getPosition();
-                log.Add(positionThis);
-                Vector3 opPosition = oposite[w].getPosition();
-                log.Add(opPosition);
-                Vector3 newCenter = (positionThis + opPosition) / 2 ;
-                log.Add(newCenter);
-
-                foreach (wall a in adjacent[w])
-                {
-
-                    Vector3 diferencia = a.getPosition() - newCenter ;
-                    log.Add(a.getPosition());
-                    log.Add(diferencia);
-                    a.moveWall(new Vector3(diferencia.x, 0, 0));
-                    log.Add(a.getPosition());
-                    a.RestoreScale(-dir.x);
+                orientation = new Vector3(1, 0, 0);
+            float difScale = 0;
+            log.Add(dir);
+            if (!adjacent[w][0].isScaled()){
+                difScale = adjacent[w][0].getScaleDiference();
+                if(dir != new Vector3 (0,0,0)){
+                    log.Add("Not in center and difscale");
+                    difScale *= 1-d ;
+                    dir = new Vector3((dir.x/Math.Abs(dir.x))*(Math.Abs(dir.x)+difScale),0, (dir.z/Math.Abs(dir.z))*(Math.Abs(dir.z)+difScale));
+                    }
+                    else{
+                        log.Add("In center and difscale");
+                        dir = new Vector3(difScale,0,difScale);
+                    }
                 }
+            Vector3 moveDir = new Vector3(orientation.x*dir.x, 0, orientation.z * dir.z);
+            log.Add("Se mueve la pared w a...");
+            log.Add(moveDir);
+            Vector3 pastPos = w.getPosition();
+            w.moveWall(moveDir);
+            //float expanded = w.RestoreOriginalScale(1);
+            Vector3 newPos = w.getPosition();
+            Vector3 opositePosition = oposite[w].getPosition();
 
-            } else
+            float changeSize = 0;
+            if (Math.Abs(Vector3.Dot(opositePosition - newPos, orientation)) > Math.Abs(Vector3.Dot(opositePosition - pastPos, orientation)))
+                changeSize = 1;
+            else
+                changeSize = -1;
+              
+            log.Add(changeSize);
+            Vector3 newCenter = (newPos + opositePosition) / 2;
+            foreach (wall a in adjacent[w])
             {
-                w.moveWall(new Vector3(0, 0, dir.z));
-                Vector3 positionThis = w.getPosition();
-                log.Add(positionThis);
-                Vector3 opPosition = oposite[w].getPosition();
-                log.Add(opPosition);
-                Vector3 newCenter = (positionThis + opPosition) / 2 ;
-                log.Add(newCenter);
-
-                foreach (wall a in adjacent[w])
-                {
-
-                    Vector3 diferencia = a.getPosition() - newCenter;
-                    log.Add(a.getPosition());
-                    log.Add(diferencia);
-                    a.moveWall(new Vector3(0, 0, diferencia.z));
-                    log.Add(a.getPosition());
-                    a.RestoreScale(-dir.z);
-                }
-
+                Vector3 diference = a.getPosition() - newCenter;
+                Vector3 perpendicular = new Vector3(orientation.z, 0, orientation.x);
+                Vector3 adjMove = new Vector3(orientation.x * diference.x, 0, orientation.z * diference.z);
+                //float adjdir = Vector3.Dot(diference, perpendicular);
+                //adjdir = adjdir / Math.Abs(adjdir);
+                //adjdir *= -1;
+                //adjdir *= expanded / 2;
+                //Vector3 moveExp = new Vector3(perpendicular.x * adjdir, 0, perpendicular.z * adjdir);
+                a.moveWall(adjMove);
+                log.Add(adjMove);
+                a.RestoreScale(changeSize * Math.Abs(Vector3.Dot(dir, orientation)));
             }
+            
+
+             
 
 
 
@@ -179,7 +188,7 @@ void RestoreRoom()
 {
     Vector3 dir = getCenter();
     
-    moveWalls(dir * d);
+    moveWalls(dir, d);
 }
 
 public void checkNewWallsToMove()

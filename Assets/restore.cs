@@ -17,6 +17,7 @@ public class restore : MonoBehaviour
     private Quaternion cameraRot;
 
     public float intensity = 1;
+    public bool hasStarted = false;
 
 
     private static Vector3 RIGHT = new Vector3(1, 0, 0);
