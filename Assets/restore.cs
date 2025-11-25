@@ -16,7 +16,7 @@ public class restore : MonoBehaviour
 
     private Quaternion cameraRot;
 
-    public float intensity = 1;
+    public float intensity;
     public bool hasStarted = false;
 
 
