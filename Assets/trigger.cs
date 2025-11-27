@@ -22,6 +22,7 @@ public class trigger : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         
+            print("TRIGGERED");
             wall.SetActive(true);
             
             restorer.StartRestoring();

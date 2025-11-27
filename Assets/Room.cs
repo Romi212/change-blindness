@@ -15,6 +15,7 @@ public class Room
     public Camera user;
     Dictionary<wall, wall> oposite ;
     Dictionary<wall, wall[]> adjacent ;
+    private Vector3 lastMove;
     
     public float d;
 
@@ -184,11 +185,9 @@ public void moveWalls(Vector3 dir)
                     a.RestoreScale(changeSize * Math.Abs(Vector3.Dot(dir, orientation)));
                 }
             }
-         
+         modifyD(moveDir);
         }
-    if(d<1){
-    d += 0.1f;
-    }
+    
 }
 
 private bool CanMove(wall w, Vector3 dir)
@@ -198,16 +197,16 @@ private bool CanMove(wall w, Vector3 dir)
 
     Vector3 userPos = user.transform.position;
 
-   float buffer = 0.1f;
+   float buffer = 0.45f;
 
     //Check user inside walls but only w x and z dont carea baout y
-    if (w == rightWall && userPos.x >= newPos.x+buffer)
+    if (w == rightWall && userPos.x >= newPos.x-buffer)
         return false;
-    if (w == leftWall && userPos.x < newPos.x-buffer)
+    if (w == leftWall && userPos.x < newPos.x+buffer)
         return false;
-    if (w == upWall && userPos.z > newPos.z+buffer)
+    if (w == upWall && userPos.z > newPos.z-buffer)
         return false;
-    if (w == downWall && userPos.z < newPos.z-buffer)
+    if (w == downWall && userPos.z < newPos.z+buffer)
         return false;
 
     return true;
@@ -236,6 +235,27 @@ public void checkNewWallsToMove()
 
 
 }
+
+    private void modifyD(Vector3 moveDir)
+    {
+        //if moveDir moves more than lastMove Decrease d else increase d
+        if (Vector3.Dot(moveDir, lastMove) > 0)
+        {
+            d -= 0.1f;
+        }
+        else
+        {
+            d += 0.1f;
+        }
+        if(d>1){
+        d =1;
+        }
+        if (d < 0.1f)
+        {
+            d = 0.1f;
+        }
+        lastMove = moveDir;
+    }
 
     public ArrayList getLog()
     {
