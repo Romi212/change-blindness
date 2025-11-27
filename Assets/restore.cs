@@ -51,7 +51,7 @@ public class restore : MonoBehaviour
     void Update()
     {
         //rooms[0].checkNewWallsToMove();
-        if (user.transform.rotation != cameraRot)
+        if (hasStarted && user.transform.rotation != cameraRot)
         {
             cameraRot = user.transform.rotation;
             print("CAMERA CHANBGED");
@@ -64,6 +64,10 @@ public class restore : MonoBehaviour
         }
     }
 
+    public void StartRestoring()
+    {
+        hasStarted = true;
+    }
     
 
     

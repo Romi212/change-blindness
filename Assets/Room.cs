@@ -127,10 +127,13 @@ public void moveWalls(Vector3 dir)
     foreach (wall w in blindWalls)
 
     {
+        //Determine orientation
             Vector3 orientation = new Vector3(0, 0, 1);
 
             if (w == rightWall || w == leftWall)
                 orientation = new Vector3(1, 0, 0);
+            
+        //Additional movement if adjacent walls are scaled    
             float difScale = 0;
             log.Add(dir);
 
@@ -147,46 +150,67 @@ public void moveWalls(Vector3 dir)
                 
             }
             Vector3 moveDir = new Vector3(orientation.x*dir.x, 0, orientation.z * dir.z);
-            log.Add("Se mueve la pared w a...");
-            log.Add(moveDir);
-            Vector3 pastPos = w.getPosition();
-            w.moveWall(moveDir);
-            //float expanded = w.RestoreOriginalScale(1);
-            Vector3 newPos = w.getPosition();
-            Vector3 opositePosition = oposite[w].getPosition();
-
-            float changeSize = 0;
-            if (Math.Abs(Vector3.Dot(opositePosition - newPos, orientation)) > Math.Abs(Vector3.Dot(opositePosition - pastPos, orientation)))
-                changeSize = 1;
-            else
-                changeSize = -1;
-              
-            //log.Add(changeSize);
-            Vector3 newCenter = (newPos + opositePosition) / 2;
-            foreach (wall a in adjacent[w])
-            {
-                Vector3 diference = a.getPosition() - newCenter;
-                Vector3 perpendicular = new Vector3(orientation.z, 0, orientation.x);
-                Vector3 adjMove = new Vector3(orientation.x * diference.x, 0, orientation.z * diference.z);
-                //float adjdir = Vector3.Dot(diference, perpendicular);
-                //adjdir = adjdir / Math.Abs(adjdir);
-                //adjdir *= -1;
-                //adjdir *= expanded / 2;
-                //Vector3 moveExp = new Vector3(perpendicular.x * adjdir, 0, perpendicular.z * adjdir);
-                a.moveWall(adjMove);
-                //log.Add(adjMove);
-                a.RestoreScale(changeSize * Math.Abs(Vector3.Dot(dir, orientation)));
-            }
             
+            Vector3 pastPos = w.getPosition();
+            if (CanMove(w, moveDir))
+            {
+                log.Add("Se mueve la pared w a...");
+                log.Add(moveDir);
+                w.moveWall(moveDir);
+                
+                Vector3 newPos = w.getPosition();
+                Vector3 opositePosition = oposite[w].getPosition();
 
-             
-
-
-
+                float changeSize = 0;
+                if (Math.Abs(Vector3.Dot(opositePosition - newPos, orientation)) > Math.Abs(Vector3.Dot(opositePosition - pastPos, orientation)))
+                    changeSize = 1;
+                else
+                    changeSize = -1;
+                
+                //log.Add(changeSize);
+                Vector3 newCenter = (newPos + opositePosition) / 2;
+                foreach (wall a in adjacent[w])
+                {
+                    Vector3 diference = a.getPosition() - newCenter;
+                    Vector3 perpendicular = new Vector3(orientation.z, 0, orientation.x);
+                    Vector3 adjMove = new Vector3(orientation.x * diference.x, 0, orientation.z * diference.z);
+                    //float adjdir = Vector3.Dot(diference, perpendicular);
+                    //adjdir = adjdir / Math.Abs(adjdir);
+                    //adjdir *= -1;
+                    //adjdir *= expanded / 2;
+                    //Vector3 moveExp = new Vector3(perpendicular.x * adjdir, 0, perpendicular.z * adjdir);
+                    a.moveWall(adjMove);
+                    //log.Add(adjMove);
+                    a.RestoreScale(changeSize * Math.Abs(Vector3.Dot(dir, orientation)));
+                }
+            }
+         
         }
     if(d<1){
     d += 0.1f;
     }
+}
+
+private bool CanMove(wall w, Vector3 dir)
+{
+    
+    Vector3 newPos = w.getPosition() - dir;
+
+    Vector3 userPos = user.transform.position;
+
+   float buffer = 0.1f;
+
+    //Check user inside walls but only w x and z dont carea baout y
+    if (w == rightWall && userPos.x >= newPos.x+buffer)
+        return false;
+    if (w == leftWall && userPos.x < newPos.x-buffer)
+        return false;
+    if (w == upWall && userPos.z > newPos.z+buffer)
+        return false;
+    if (w == downWall && userPos.z < newPos.z-buffer)
+        return false;
+
+    return true;
 }
 void RestoreRoom()
 {

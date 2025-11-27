@@ -54,7 +54,7 @@ public class wall : MonoBehaviour
        // print("and scaling: ");
         //print(scaleCoficient);
        // RestoreScale(scaleCoficient);
-        this.transform.position -= (movevector);
+        this.transform.position -= movevector;
         
         
     }
