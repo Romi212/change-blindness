@@ -227,7 +227,7 @@ public void checkNewWallsToMove()
 
     if (!blindWalls.SetEquals(curentHidWalls))
     {
-        
+        log.Add("Nuevas paredes ocultas");
         blindWalls = new HashSet<wall>(curentHidWalls);
         RestoreRoom();
     }

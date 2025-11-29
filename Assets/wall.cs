@@ -8,6 +8,7 @@ public class wall : MonoBehaviour
 
     public float originalScale;
     public Vector3 orientation;
+    public GameObject DarkScreen;
     // Start is called before the first frame update
     void Start()
     {
@@ -111,5 +112,23 @@ public class wall : MonoBehaviour
     {
         float currentScale = this.transform.localScale.z;
         return originalScale - currentScale;
+    }
+
+
+    // on trigger dark
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("MainCamera"))
+        {
+            DarkScreen.SetActive(true);
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.CompareTag("MainCamera"))
+        {
+            DarkScreen.SetActive(false);
+        }
     }
 }
