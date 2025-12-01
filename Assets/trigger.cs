@@ -6,6 +6,9 @@ public class trigger : MonoBehaviour
 {
     public restore restorer;
     public GameObject wall;
+    public door door1;
+
+    private bool triggered = false;
     public GameObject lobby;
     // Start is called before the first frame update
     void Start()
@@ -22,15 +25,26 @@ public class trigger : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         
-        if( other.tag == "MainCamera")
+        if( !triggered && other.tag == "MainCamera")
         {
+            triggered = true;
             print("TRIGGERED");
             wall.SetActive(true);
             
             restorer.StartRestoring();
             lobby.SetActive(false);
+            door1.closeDoor();
         }
             
         
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if(triggered && other.tag == "MainCamera")
+        {
+            triggered = false;
+            
+        }
     }
 }

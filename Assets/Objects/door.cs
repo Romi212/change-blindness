@@ -1,14 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class door : MonoBehaviour
 {
     public bool playerWatching = false;
+    public bool canOpen = true;
     public GameObject toRotate;
     public bool opened= false;
+    public Slider slide1;
+    public Slider slide2;
     private float watchCounter = 0f;
-    public float requiredWatchTime = 5f;
+    public float requiredWatchTime = 3f;
     // Start is called before the first frame update
     void Start()
     {
@@ -18,9 +22,11 @@ public class door : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(playerWatching)
+        if(playerWatching && canOpen)
         {
             watchCounter += Time.deltaTime;
+            slide1.value = Mathf.Clamp01(watchCounter / requiredWatchTime);
+            slide2.value = Mathf.Clamp01(watchCounter / requiredWatchTime);
             if(watchCounter >= requiredWatchTime)
             {
                 if (!opened)
@@ -46,6 +52,8 @@ public class door : MonoBehaviour
         }
         else
         {
+            slide1.value = 0f;
+            slide2.value = 0f;
             watchCounter = 0f;
 
         }
@@ -77,6 +85,21 @@ public class door : MonoBehaviour
         
     }
 
+public void closeDoor()
+    {
+        if (opened)
+        {
+            toRotate.transform.Rotate(0, -90, 0);
+            print("DOOR CLOSED");
+            opened = false;
+            canOpen = false;
+        }
+    }
+
+public void enableDoor()
+    {
+        canOpen = true;
+    }
     //player has to watch for 5 seconds for door to activate
    
 }

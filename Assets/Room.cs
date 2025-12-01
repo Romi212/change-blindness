@@ -227,8 +227,9 @@ private bool CanMove(wall w, Vector3 dir)
     
     
    float area = w.getScale() * dif.magnitude ;
-   if(area>= (realArea-0.001f) && area <= (realArea+0.001f) && getCenter().magnitude <0.01f)
+   if(area>= (realArea-0.061f) && area <= (realArea+0.061f) && getCenter().magnitude <0.1f)
       {
+        log.Add("Room fully restored");
         isRestored = true;
        return false;
       }

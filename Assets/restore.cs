@@ -25,7 +25,9 @@ public class restore : MonoBehaviour
     private static Vector3 UP = new Vector3(0, 1, 0);
     private static Vector3 DOWN = new Vector3(0, -1, 0);
 
-    
+    public GameObject lobby;
+    public GameObject wallMedium;
+    public door door1;
         
 
     public Room[] rooms; 
@@ -55,12 +57,23 @@ public class restore : MonoBehaviour
         {
             cameraRot = user.transform.rotation;
             print("CAMERA CHANBGED");
-            rooms[0].checkNewWallsToMove();
-            ArrayList log = rooms[0].getLog();
-            foreach (var msg in log)
+            if (!rooms[0].isRestored)
             {
-                print(msg);
+                rooms[0].checkNewWallsToMove();
+                ArrayList log = rooms[0].getLog();
+                foreach (var msg in log)
+                {
+                    print(msg);
+                }
             }
+            else
+            {
+                print("ROOM RESTORED");
+                door1.enableDoor();
+                lobby.SetActive(true);
+                wallMedium.SetActive(false);
+            }
+            
         }
     }
 
