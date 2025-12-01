@@ -9,6 +9,9 @@ public class wall : MonoBehaviour
     public float originalScale;
     public Vector3 orientation;
     public GameObject DarkScreen;
+    public GameObject[] attached;
+
+    public bool isVisible = true;
     // Start is called before the first frame update
     void Start()
     {
@@ -20,6 +23,17 @@ public class wall : MonoBehaviour
     void Update()
     {
         
+    }
+
+    public bool ChangeVisible(bool v)
+    {
+        if(v != isVisible)
+        {
+            print("Changing visibility "+ isVisible +" to: " + v);
+            isVisible = v;
+            return true;
+        }
+        return false;
     }
     public void Initialize()
     {
@@ -67,7 +81,12 @@ public class wall : MonoBehaviour
     }
     public void moveWall(Vector3 dir)
     {
+        //first normalize dir
         this.transform.position -= dir;
+        foreach (GameObject a in attached)
+        {
+            a.transform.position -= dir;
+        }
     }
     
     public void fillRoom(Vector3 direction) {
@@ -130,5 +149,15 @@ public class wall : MonoBehaviour
         {
             DarkScreen.SetActive(false);
         }
+    }
+
+    public float getOriginalScale()
+    {
+        return originalScale;
+    }
+
+    public float getScale()
+    {
+        return this.transform.localScale.z;
     }
 }

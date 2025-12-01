@@ -6,6 +6,7 @@ using System;
 public class Room
 {
     public wall[] walls;
+    public bool isRestored = false;
     public HashSet<wall> blindWalls;
     public ArrayList log;
     public wall rightWall;
@@ -16,6 +17,9 @@ public class Room
     Dictionary<wall, wall> oposite ;
     Dictionary<wall, wall[]> adjacent ;
     private Vector3 lastMove;
+    float realArea;
+    float initialArea;
+    float biggestArea;
     
     public float d;
 
@@ -23,22 +27,29 @@ public class Room
     public Room(GameObject[] w, Camera u, float intens)
     {
         walls = new wall[4];
+        
         user = u;
         d = intens;
         blindWalls = new HashSet<wall>();
         oposite = new Dictionary<wall, wall>();
         adjacent = new Dictionary<wall, wall[]>();
         log = new ArrayList();
-
+        float xlen = 0;
+        float initialXlen = 0;
+        float zlen = 0;
+        float initialZlen = 0;
         foreach (GameObject wa in w)
         {
         wall wScript = wa.GetComponent<wall>();
         Vector3 orientation = wScript.getOrientation();
 
+        
         if (orientation.x > 0.5)
         {
             walls[0] = wScript;
             rightWall = wScript;
+            xlen  =  wScript.getOriginalScale();
+            initialXlen = wScript.getScale();
             
         }
         else
@@ -47,6 +58,8 @@ public class Room
             {
                 walls[1] = wScript;
                 leftWall = wScript;
+                zlen = wScript.getOriginalScale();
+                initialZlen = wScript.getScale();
                 
             }
             else
@@ -77,6 +90,9 @@ public class Room
         
 
     }
+        realArea = xlen * zlen;
+        initialArea = initialXlen * initialZlen;
+        biggestArea = realArea*1.5f;
         oposite.Add(rightWall, leftWall);
         oposite.Add(upWall, downWall);
         oposite.Add(downWall, upWall);
@@ -124,10 +140,12 @@ public HashSet<wall> getHiddenWalls()
 }
 public void moveWalls(Vector3 dir)
 {
-    dir = dir* d;
+    
     foreach (wall w in blindWalls)
 
     {
+        log.Add("Moving wall: ");
+        log.Add(w);
         //Determine orientation
             Vector3 orientation = new Vector3(0, 0, 1);
 
@@ -136,12 +154,12 @@ public void moveWalls(Vector3 dir)
             
         //Additional movement if adjacent walls are scaled    
             float difScale = 0;
-            log.Add(dir);
+            //log.Add(dir);
 
             if (!adjacent[w][0].isScaled()){
                 difScale = adjacent[w][0].getScaleDiference();
-                log.Add("DIFSCALE:");
-                log.Add(difScale);
+               // log.Add("DIFSCALE:");
+               // log.Add(difScale);
                 
                 difScale *= d ;
                 if (w == rightWall || w == upWall)
@@ -150,13 +168,18 @@ public void moveWalls(Vector3 dir)
                 
                 
             }
+            if (dir.magnitude > 0.2f)
+            {
+                dir = dir.normalized * d;
+            }
+            
             Vector3 moveDir = new Vector3(orientation.x*dir.x, 0, orientation.z * dir.z);
             
             Vector3 pastPos = w.getPosition();
             if (CanMove(w, moveDir))
             {
-                log.Add("Se mueve la pared w a...");
-                log.Add(moveDir);
+               // log.Add("Se mueve la pared w a...");
+               // log.Add(moveDir);
                 w.moveWall(moveDir);
                 
                 Vector3 newPos = w.getPosition();
@@ -185,7 +208,7 @@ public void moveWalls(Vector3 dir)
                     a.RestoreScale(changeSize * Math.Abs(Vector3.Dot(dir, orientation)));
                 }
             }
-         modifyD(moveDir);
+        // modifyD(moveDir);
         }
     
 }
@@ -199,9 +222,25 @@ private bool CanMove(wall w, Vector3 dir)
 
    float buffer = 0.45f;
 
+    Vector3 dif = oposite[w].getPosition() - newPos;
+
+    
+    
+   float area = w.getScale() * dif.magnitude ;
+   if(area>= (realArea-0.001f) && area <= (realArea+0.001f) && getCenter().magnitude <0.01f)
+      {
+        isRestored = true;
+       return false;
+      }
+   if( area > biggestArea || area < initialArea)
+   return false;
+
     //Check user inside walls but only w x and z dont carea baout y
-    if (w == rightWall && userPos.x >= newPos.x-buffer)
+    if (w == rightWall && userPos.x >= newPos.x - buffer)
+        {
         return false;
+        }
+        
     if (w == leftWall && userPos.x < newPos.x+buffer)
         return false;
     if (w == upWall && userPos.z > newPos.z-buffer)
@@ -218,20 +257,57 @@ void RestoreRoom()
     moveWalls(dir);
 }
 
+private bool AddHidWall(wall w)
+{
+    //This always hits true even if 
+    if (!blindWalls.Contains(w))
+    {
+        blindWalls.Add(w);
+        log.Add("Nueva pared oculta agregada");
+        log.Add(w);
+        return true;
+    }
+    return false;
+}
+private bool RemoveHidWall(wall w)
+{
+    if (blindWalls.Contains(w))
+    {
+        blindWalls.Remove(w);
+        log.Add("Pared oculta removida");
+        log.Add(w);
+        return true;
+    }
+    return false;
+}
 public void checkNewWallsToMove()
 {
 
-    HashSet<wall> curentHidWalls = getHiddenWalls();
-
-
-
-    if (!blindWalls.SetEquals(curentHidWalls))
+if(!isRestored){
+    bool changed = false;
+    Plane[] planes = GeometryUtility.CalculateFrustumPlanes(user);
+    blindWalls = new HashSet<wall>();
+    foreach (wall w in walls)
     {
-        log.Add("Nuevas paredes ocultas");
-        blindWalls = new HashSet<wall>(curentHidWalls);
-        RestoreRoom();
+       // log.Add("Checking wall: ");
+        //log.Add(w);
+        Bounds bounds = w.getBounds();
+        if (!GeometryUtility.TestPlanesAABB(planes, bounds))
+        {
+            changed = changed || w.ChangeVisible(false);
+            blindWalls.Add(w);
+        } else {
+            changed = changed || w.ChangeVisible(true);}
+
     }
 
+    if (changed)
+    {
+        //log.Add("Nuevas paredes ocultas");
+        
+        RestoreRoom();
+    }
+}
 
 
 }
@@ -259,6 +335,8 @@ public void checkNewWallsToMove()
 
     public ArrayList getLog()
     {
-        return log;
+        ArrayList toReturn = log;
+        log = new ArrayList();
+        return toReturn;
     }
     }

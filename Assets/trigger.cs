@@ -22,11 +22,15 @@ public class trigger : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         
+        if( other.tag == "MainCamera")
+        {
             print("TRIGGERED");
             wall.SetActive(true);
             
             restorer.StartRestoring();
             lobby.SetActive(false);
+        }
+            
         
     }
 }
