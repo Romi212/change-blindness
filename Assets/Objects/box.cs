@@ -3,19 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class door : MonoBehaviour
+public class box : MonoBehaviour
 {
     public bool playerWatching = false;
     public bool canOpen = true;
-    public GameObject toRotate;
+    public bool canSpawnKey = false;
     public bool opened= false;
     public Slider slide1;
     public Slider slide2;
     private float watchCounter = 0f;
     public float requiredWatchTime = 3f;
 
-    public GameObject[] doorWals;
-    public GameObject[] adjWalls;
+    //Add an array with different prefabs to create random surprise
+    public GameObject[] surprisePrefabs;
+
+    public GameObject key;
     // Start is called before the first frame update
     void Start()
     {
@@ -34,32 +36,11 @@ public class door : MonoBehaviour
             {
                 if (!opened)
                 {
-                    toRotate.transform.Rotate(0,90,0);
+                    openBox();
                     print("DOOR OPENED");
                     opened = true;
-                    foreach(GameObject w in adjWalls)
-                    {
-                        w.SetActive(false);
-                    }
-                    foreach(GameObject w in doorWals)
-                    {
-                        w.SetActive(true);
-                    }
                 }
-                else
-                {
-                    toRotate.transform.Rotate(0,-90,0);
-                    print("DOOR CLOSED");
-                    opened = false;
-                    foreach(GameObject w in adjWalls)
-                    {
-                        w.SetActive(true);
-                    }
-                    foreach(GameObject w in doorWals)
-                    {
-                        w.SetActive(false);
-                    }
-                }
+                
                 //activate door
                 
                 playerWatching = false;
@@ -104,29 +85,35 @@ public class door : MonoBehaviour
         
     }
 
-public void closeDoor()
-    {
-        if (opened)
-        {
-            toRotate.transform.Rotate(0, -90, 0);
-            print("DOOR CLOSED");
-            opened = false;
-            canOpen = false;
-            foreach(GameObject w in adjWalls)
-            {
-                w.SetActive(true);
-            }
-            foreach(GameObject w in doorWals)
-                    {
-                        w.SetActive(false);
-                    }
-        }
-    }
 
-public void enableDoor()
+private void openBox()
+    {
+        if(canSpawnKey)
+        {
+            //Spawn key
+            Instantiate(key, this.transform.position + new Vector3(0,0.5f,0), Quaternion.identity);
+        }
+        else
+        {
+            int index = Random.Range(0, surprisePrefabs.Length);
+        Instantiate(surprisePrefabs[index], this.transform.position, Quaternion.identity);
+        
+        }
+        //Create an istance of a random prefab from the array
+        
+
+
+        //destry this
+        Destroy(this.gameObject);
+    }
+public void enableBox()
     {
         canOpen = true;
     }
-    //player has to watch for 5 seconds for door to activate
+   
+   public void SpawnKey()
+    {
+        canSpawnKey = true;
+    }
    
 }

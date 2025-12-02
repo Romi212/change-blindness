@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public class Room
+public class Room : MonoBehaviour
 {
     public wall[] walls;
     public bool isRestored = false;
@@ -20,16 +20,15 @@ public class Room
     float realArea;
     float initialArea;
     float biggestArea;
-    
+    public restore restorer;
     public float d;
+    public door door1;
 
+public bool triggered = false;
 
-    public Room(GameObject[] w, Camera u, float intens)
+    public void Initialize()
     {
-        walls = new wall[4];
-        
-        user = u;
-        d = intens;
+       
         blindWalls = new HashSet<wall>();
         oposite = new Dictionary<wall, wall>();
         adjacent = new Dictionary<wall, wall[]>();
@@ -38,15 +37,20 @@ public class Room
         float initialXlen = 0;
         float zlen = 0;
         float initialZlen = 0;
-        foreach (GameObject wa in w)
+        foreach (wall wScript in walls)
         {
-        wall wScript = wa.GetComponent<wall>();
+            wScript.Initialize();
+        }
+        foreach (wall wScript in walls)
+        {
+            wScript.Initialize();
+        
         Vector3 orientation = wScript.getOrientation();
 
         
         if (orientation.x > 0.5)
         {
-            walls[0] = wScript;
+            
             rightWall = wScript;
             xlen  =  wScript.getOriginalScale();
             initialXlen = wScript.getScale();
@@ -56,7 +60,7 @@ public class Room
         {
             if (orientation.x < -0.5)
             {
-                walls[1] = wScript;
+                
                 leftWall = wScript;
                 zlen = wScript.getOriginalScale();
                 initialZlen = wScript.getScale();
@@ -68,7 +72,7 @@ public class Room
 
                 if (orientation.z > 0.5)
                 {
-                    walls[2] = wScript;
+                    
                     upWall = wScript;
                     
                 }
@@ -77,7 +81,7 @@ public class Room
                 {
                     if (orientation.z < -0.5)
                     {
-                        walls[3] = wScript;
+                        
                         downWall = wScript;
                         
                     }
@@ -119,25 +123,7 @@ public Vector3 getCenter()
     
     return center;
 }
-public HashSet<wall> getHiddenWalls()
-{
-    HashSet<wall> currentHidWall = new HashSet<wall>();
-    Plane[] planes = GeometryUtility.CalculateFrustumPlanes(user);
-    foreach (wall w in walls)
-    {
-        Bounds bounds = w.getBounds();
-        if (!GeometryUtility.TestPlanesAABB(planes, bounds))
-        {
-            currentHidWall.Add(w);
 
-        }
-
-    }
-
-
-
-    return currentHidWall;
-}
 public void moveWalls(Vector3 dir)
 {
     
@@ -258,29 +244,7 @@ void RestoreRoom()
     moveWalls(dir);
 }
 
-private bool AddHidWall(wall w)
-{
-    //This always hits true even if 
-    if (!blindWalls.Contains(w))
-    {
-        blindWalls.Add(w);
-        log.Add("Nueva pared oculta agregada");
-        log.Add(w);
-        return true;
-    }
-    return false;
-}
-private bool RemoveHidWall(wall w)
-{
-    if (blindWalls.Contains(w))
-    {
-        blindWalls.Remove(w);
-        log.Add("Pared oculta removida");
-        log.Add(w);
-        return true;
-    }
-    return false;
-}
+
 public void checkNewWallsToMove()
 {
 
@@ -339,5 +303,41 @@ if(!isRestored){
         ArrayList toReturn = log;
         log = new ArrayList();
         return toReturn;
+    }
+    
+    
+private void OnTriggerEnter(Collider other)
+    {
+        
+        if( !triggered && other.tag == "MainCamera")
+        {
+            triggered = true;
+            print("TRIGGERED");
+            
+            
+            restorer.Entered(this.GetComponent<Room>());
+            door1.closeDoor();
+        }
+            
+        
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if(triggered && other.tag == "MainCamera")
+        {
+            triggered = false;
+            
+        }
+    }
+public void Hide()
+    {
+        this.gameObject.SetActive(false);
+    }
+
+    public void Compress()
+    {
+        isRestored = false;
+        this.gameObject.SetActive(true);
     }
     }

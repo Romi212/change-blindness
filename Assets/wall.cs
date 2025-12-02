@@ -38,7 +38,7 @@ public class wall : MonoBehaviour
     public void Initialize()
     {
         Vector3 scale = this.transform.localScale;
-        originalScale = 2f;
+        
         orientation = this.transform.right;
     }
     public void RestoreScale(float d)

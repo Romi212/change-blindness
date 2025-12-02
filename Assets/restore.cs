@@ -12,7 +12,8 @@ public class restore : MonoBehaviour
 {
     public Camera user;
     
-    public GameObject[] walls;
+    public Room[] rooms;
+
 
     private Quaternion cameraRot;
 
@@ -28,20 +29,21 @@ public class restore : MonoBehaviour
     public GameObject lobby;
     public GameObject wallMedium;
     public door door1;
+
+    private Room currentRoom;
         
 
-    public Room[] rooms; 
+    
     // Start is called before the first frame update
     void Start()
     {
-        foreach (GameObject w in walls)
+        
+        foreach (Room r in rooms)
         {
-            wall ws = w.GetComponent<wall>();
-            ws.Initialize();
-           
+            r.user = user;
+            r.d = intensity;
+            r.Initialize();
         }
-        Room r1 = new Room(walls, user, intensity);
-        rooms = new Room[]{r1};
 
         cameraRot = user.transform.rotation;
         
@@ -57,10 +59,10 @@ public class restore : MonoBehaviour
         {
             cameraRot = user.transform.rotation;
             print("CAMERA CHANBGED");
-            if (!rooms[0].isRestored)
+            if (!currentRoom.isRestored)
             {
-                rooms[0].checkNewWallsToMove();
-                ArrayList log = rooms[0].getLog();
+                currentRoom.checkNewWallsToMove();
+                ArrayList log = currentRoom.getLog();
                 foreach (var msg in log)
                 {
                     print(msg);
@@ -68,10 +70,10 @@ public class restore : MonoBehaviour
             }
             else
             {
+                hasStarted = false;
                 print("ROOM RESTORED");
                 door1.enableDoor();
-                lobby.SetActive(true);
-                wallMedium.SetActive(false);
+                compressRest();
             }
             
         }
@@ -82,6 +84,33 @@ public class restore : MonoBehaviour
         hasStarted = true;
     }
     
+    public void Entered(Room r)
+    {
+        if(r.isRestored)
+        {
+            return;
+        }
+        hasStarted = true;
+        currentRoom = r;
+        foreach(Room room in rooms)
+        {
+            if(room != r)
+            {
+                room.Hide();
+            }
+        }
+    }
+
+    private void compressRest()
+    {
+        foreach(Room r in rooms)
+        {
+            if(r != currentRoom)
+            {
+                r.Compress();
+            }
+        }
+    }   
 
     
 }
