@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-
+using UnityEngine.UI;
 public class Room : MonoBehaviour
 {
     public wall[] walls;
@@ -23,6 +23,10 @@ public class Room : MonoBehaviour
     public restore restorer;
     public float d;
     public door door1;
+    public GameObject flor;
+    public GameObject boxPrefab;
+    public Slider progressSlider;
+    public Slider progressSlider2;
 
 public bool triggered = false;
 
@@ -161,11 +165,19 @@ public void moveWalls(Vector3 dir)
             
             Vector3 moveDir = new Vector3(orientation.x*dir.x, 0, orientation.z * dir.z);
             
-            Vector3 pastPos = w.getPosition();
+            
             if (CanMove(w, moveDir))
             {
-               // log.Add("Se mueve la pared w a...");
-               // log.Add(moveDir);
+               actuallyMoveWall(w, moveDir, orientation);
+            }
+        
+        }
+    
+}
+
+private void actuallyMoveWall(wall w, Vector3 moveDir, Vector3 orientation )
+{
+                Vector3 pastPos = w.getPosition();
                 w.moveWall(moveDir);
                 
                 Vector3 newPos = w.getPosition();
@@ -184,21 +196,12 @@ public void moveWalls(Vector3 dir)
                     Vector3 diference = a.getPosition() - newCenter;
                     Vector3 perpendicular = new Vector3(orientation.z, 0, orientation.x);
                     Vector3 adjMove = new Vector3(orientation.x * diference.x, 0, orientation.z * diference.z);
-                    //float adjdir = Vector3.Dot(diference, perpendicular);
-                    //adjdir = adjdir / Math.Abs(adjdir);
-                    //adjdir *= -1;
-                    //adjdir *= expanded / 2;
-                    //Vector3 moveExp = new Vector3(perpendicular.x * adjdir, 0, perpendicular.z * adjdir);
+                    
                     a.moveWall(adjMove);
-                    //log.Add(adjMove);
-                    a.RestoreScale(changeSize * Math.Abs(Vector3.Dot(dir, orientation)));
+                    
+                    a.RestoreScale(changeSize * Math.Abs(Vector3.Dot(moveDir, orientation)));
                 }
-            }
-        // modifyD(moveDir);
-        }
-    
 }
-
 private bool CanMove(wall w, Vector3 dir)
 {
     
@@ -219,8 +222,12 @@ private bool CanMove(wall w, Vector3 dir)
         isRestored = true;
        return false;
       }
-   if( area > biggestArea || area < initialArea)
-   return false;
+   //if( area > biggestArea || area < initialArea)
+    //    {
+    //     log.Add("Room cannot be restored further");
+    //     return false;
+    ///    }
+   
 
     //Check user inside walls but only w x and z dont carea baout y
     if (w == rightWall && userPos.x >= newPos.x - buffer)
@@ -235,6 +242,7 @@ private bool CanMove(wall w, Vector3 dir)
     if (w == downWall && userPos.z < newPos.z+buffer)
         return false;
 
+    log.Add("Wall can move");
     return true;
 }
 void RestoreRoom()
@@ -244,6 +252,32 @@ void RestoreRoom()
     moveWalls(dir);
 }
 
+public void boxOpened()
+    {
+        generateBox();
+    }
+private void generateBox()
+    {
+        //Choose a random wall
+        System.Random rnd = new System.Random();
+        int wallIndex = rnd.Next(0, walls.Length);
+        wall chosenWall = walls[wallIndex];
+        
+        Vector3 wallPos = chosenWall.getPosition();
+        //Generate box position near wall
+        Vector3 boxPos = wallPos - chosenWall.getOrientation() * 0.5f;
+        boxPos.y = 0.5f;
+        
+        GameObject newBox = Instantiate(boxPrefab, boxPos, Quaternion.identity);
+        chosenWall.addAttached(newBox);
+        box boxScrpipt = newBox.transform.GetChild(0).GetComponent<box>();
+        if (isRestored) boxScrpipt.SpawnKey();
+        boxScrpipt.roomRef = this;
+        boxScrpipt.slide1 = progressSlider;
+        boxScrpipt.slide2 = progressSlider2;
+
+
+    }
 
 public void checkNewWallsToMove()
 {
@@ -339,5 +373,33 @@ public void Hide()
     {
         isRestored = false;
         this.gameObject.SetActive(true);
+        initialArea = leftWall.getScale() * upWall.getScale();
+
+        Bounds florBounds = flor.GetComponent<Collider>().bounds;
+        if(leftWall.getPosition().x < florBounds.min.x)
+        {
+            Vector3 pos = leftWall.getPosition();
+            actuallyMoveWall(leftWall, new Vector3(florBounds.min.x - pos.x, 0, 0), new Vector3(1,0,0));
+            
+        }
+        if(rightWall.getPosition().x > florBounds.max.x)
+        {
+            Vector3 pos = rightWall.getPosition();
+            actuallyMoveWall(rightWall, new Vector3(florBounds.max.x - pos.x, 0, 0), new Vector3(1,0,0));
+            
+        }
+        if (downWall.getPosition().z < florBounds.min.z)
+        {
+            Vector3 pos = downWall.getPosition();
+            actuallyMoveWall(downWall, new Vector3(0, 0, pos.z - florBounds.min.z), new Vector3(0,0,1));
+            
+        }
+        if (upWall.getPosition().z > florBounds.max.z)
+        {
+            Vector3 pos = upWall.getPosition();
+            actuallyMoveWall(upWall, new Vector3(0, 0, florBounds.max.z - pos.z), new Vector3(0,0,1));
+            
+        }
+
     }
     }

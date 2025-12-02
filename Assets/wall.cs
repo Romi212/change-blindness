@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 
+
 public class wall : MonoBehaviour
 {
 
     public float originalScale;
     public Vector3 orientation;
     public GameObject DarkScreen;
-    public GameObject[] attached;
+     public List<GameObject> attached;
+    
 
     public bool isVisible = true;
     // Start is called before the first frame update
@@ -25,6 +27,10 @@ public class wall : MonoBehaviour
         
     }
 
+    public void addAttached(GameObject a)
+    {
+        attached.Add(a);
+    }
     public bool ChangeVisible(bool v)
     {
         if(v != isVisible)

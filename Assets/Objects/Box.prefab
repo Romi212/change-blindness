@@ -120,15 +120,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerWatching: 0
   canOpen: 1
-  toRotate: {fileID: 0}
-  inside: {fileID: 0}
+  canSpawnKey: 0
   opened: 0
   slide1: {fileID: 0}
   slide2: {fileID: 0}
   requiredWatchTime: 3
+  roomRef: {fileID: 0}
   surprisePrefabs:
   - {fileID: 2605278393733549968, guid: ffe756d7c512249439b18c1a1674bf9a, type: 3}
   - {fileID: 1220959491220513841, guid: 5d8570351bd284b438cf33f936d1809d, type: 3}
+  key: {fileID: 9175256021920500885, guid: 5aa3127ae89792c44bb0bf7958ef8d03, type: 3}
 --- !u!1 &2992005588630101941
 GameObject:
   m_ObjectHideFlags: 0

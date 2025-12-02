@@ -92,6 +92,7 @@ public class restore : MonoBehaviour
         }
         hasStarted = true;
         currentRoom = r;
+        r.boxOpened();
         foreach(Room room in rooms)
         {
             if(room != r)

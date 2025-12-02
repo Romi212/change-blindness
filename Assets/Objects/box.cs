@@ -14,6 +14,8 @@ public class box : MonoBehaviour
     private float watchCounter = 0f;
     public float requiredWatchTime = 3f;
 
+    public Room roomRef;
+
     //Add an array with different prefabs to create random surprise
     public GameObject[] surprisePrefabs;
 
@@ -52,8 +54,12 @@ public class box : MonoBehaviour
         }
         else
         {
-            slide1.value = 0f;
+            if( slide1!= null && slide2 != null)
+            {
+                slide1.value = 0f;
             slide2.value = 0f;
+            }
+            
             watchCounter = 0f;
 
         }
@@ -104,6 +110,7 @@ private void openBox()
 
 
         //destry this
+        roomRef.boxOpened();
         Destroy(this.gameObject);
     }
 public void enableBox()
