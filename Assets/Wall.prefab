@@ -118,7 +118,7 @@ GameObject:
   - component: {fileID: 9155735794541643357}
   m_Layer: 0
   m_Name: Wall
-  m_TagString: Untagged
+  m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -154,6 +154,7 @@ MonoBehaviour:
   originalScale: 0
   orientation: {x: 0, y: 0, z: 0}
   DarkScreen: {fileID: 0}
+  attached: []
   isVisible: 1
 --- !u!65 &9155735794541643357
 BoxCollider:

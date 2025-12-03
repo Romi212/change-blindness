@@ -13,7 +13,12 @@ public class door : MonoBehaviour
     public Slider slide2;
     private float watchCounter = 0f;
     public float requiredWatchTime = 3f;
+    public sewin sewingObj;
 
+    public GameObject text1;
+    public GameObject text2;
+public AudioSource openAudio;
+    public AudioSource closeAudio;
     public GameObject[] doorWals;
     public GameObject[] adjWalls;
     // Start is called before the first frame update
@@ -32,11 +37,17 @@ public class door : MonoBehaviour
             slide2.value = Mathf.Clamp01(watchCounter / requiredWatchTime);
             if(watchCounter >= requiredWatchTime)
             {
+                    var sources = GetComponents<AudioSource>();
+        if (openAudio == null && sources.Length > 0) openAudio = sources[0];
+        if (closeAudio == null && sources.Length > 1) closeAudio = sources[1];
+        
                 if (!opened)
                 {
                     toRotate.transform.Rotate(0,90,0);
                     print("DOOR OPENED");
                     opened = true;
+                     if (openAudio != null) openAudio.Play();
+                        else GetComponent<AudioSource>()?.Play();
                     foreach(GameObject w in adjWalls)
                     {
                         w.SetActive(false);
@@ -51,6 +62,7 @@ public class door : MonoBehaviour
                     toRotate.transform.Rotate(0,-90,0);
                     print("DOOR CLOSED");
                     opened = false;
+                    if (closeAudio != null) closeAudio.Play();
                     foreach(GameObject w in adjWalls)
                     {
                         w.SetActive(true);
@@ -86,6 +98,11 @@ public class door : MonoBehaviour
         {
             playerWatching = true;
 
+            if (!canOpen)
+            {
+                text1.SetActive(true);
+                text2.SetActive(true);
+            }
             
             print("DOOR TRIGGERED");
         }
@@ -98,6 +115,11 @@ public class door : MonoBehaviour
         if( other.tag == "Player")
         {
             playerWatching = false;
+            if (!canOpen)
+            {
+                text1.SetActive(false);
+                text2.SetActive(false);
+            }
             print("DOOR UNTRIGGERED");
         }
            
@@ -111,6 +133,10 @@ public void closeDoor()
             toRotate.transform.Rotate(0, -90, 0);
             print("DOOR CLOSED");
             opened = false;
+            var sources = GetComponents<AudioSource>();
+        if (openAudio == null && sources.Length > 0) openAudio = sources[0];
+        if (closeAudio == null && sources.Length > 1) closeAudio = sources[1];
+            if (closeAudio != null) closeAudio.Play();
             canOpen = false;
             foreach(GameObject w in adjWalls)
             {
@@ -126,6 +152,7 @@ public void closeDoor()
 public void enableDoor()
     {
         canOpen = true;
+        sewingObj.gotSissors();
     }
     //player has to watch for 5 seconds for door to activate
    

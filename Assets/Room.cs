@@ -6,7 +6,10 @@ using UnityEngine.UI;
 public class Room : MonoBehaviour
 {
     public wall[] walls;
+    private int wallIndex = 0;
     public bool isRestored = false;
+    public GameObject keyText1;
+    public GameObject keyText2;
     public HashSet<wall> blindWalls;
     public ArrayList log;
     public wall rightWall;
@@ -27,6 +30,8 @@ public class Room : MonoBehaviour
     public GameObject boxPrefab;
     public Slider progressSlider;
     public Slider progressSlider2;
+
+    private bool gotKey = false;
 
 public bool triggered = false;
 
@@ -259,14 +264,13 @@ public void boxOpened()
 private void generateBox()
     {
         //Choose a random wall
-        System.Random rnd = new System.Random();
-        int wallIndex = rnd.Next(0, walls.Length);
+        wallIndex = (wallIndex + 1) % walls.Length;
         wall chosenWall = walls[wallIndex];
         
         Vector3 wallPos = chosenWall.getPosition();
         //Generate box position near wall
-        Vector3 boxPos = wallPos - chosenWall.getOrientation() * 0.5f;
-        boxPos.y = 0.5f;
+        Vector3 boxPos = wallPos - chosenWall.getOrientation() * 0.2f;
+        boxPos.y = 0.1f;
         
         GameObject newBox = Instantiate(boxPrefab, boxPos, Quaternion.identity);
         chosenWall.addAttached(newBox);
@@ -339,7 +343,18 @@ if(!isRestored){
         return toReturn;
     }
     
-    
+public void keySpawned()
+    {
+        keyText1.SetActive(true);
+        keyText2.SetActive(true);
+        gotKey = true;
+    }
+
+    public bool IsRestored()
+    {
+        return isRestored && gotKey;
+        }
+
 private void OnTriggerEnter(Collider other)
     {
         
@@ -372,6 +387,7 @@ public void Hide()
     public void Compress()
     {
         isRestored = false;
+        gotKey = false;
         this.gameObject.SetActive(true);
         initialArea = leftWall.getScale() * upWall.getScale();
 

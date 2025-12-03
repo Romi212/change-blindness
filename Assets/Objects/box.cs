@@ -36,17 +36,20 @@ public class box : MonoBehaviour
             slide2.value = Mathf.Clamp01(watchCounter / requiredWatchTime);
             if(watchCounter >= requiredWatchTime)
             {
+                playerWatching = false;
+                watchCounter = 0f;
                 if (!opened)
                 {
+                    opened = true;
+                    this.GetComponent<AudioSource>().Stop();
                     openBox();
                     print("DOOR OPENED");
-                    opened = true;
+                    
                 }
                 
                 //activate door
                 
-                playerWatching = false;
-                watchCounter = 0f;
+                
                 
 
 
@@ -72,6 +75,7 @@ public class box : MonoBehaviour
         if( other.tag == "Player")
         {
             playerWatching = true;
+            this.GetComponent<AudioSource>().Play();
 
             
             print("DOOR TRIGGERED");
@@ -84,6 +88,7 @@ public class box : MonoBehaviour
     {
         if( other.tag == "Player")
         {
+            this.GetComponent<AudioSource>().Stop();
             playerWatching = false;
             print("DOOR UNTRIGGERED");
         }
@@ -97,12 +102,14 @@ private void openBox()
         if(canSpawnKey)
         {
             //Spawn key
-            Instantiate(key, this.transform.position + new Vector3(0,0.5f,0), Quaternion.identity);
+            Instantiate(key, this.transform.position , Quaternion.identity);
+            roomRef.keySpawned();
         }
         else
         {
             int index = Random.Range(0, surprisePrefabs.Length);
         Instantiate(surprisePrefabs[index], this.transform.position, Quaternion.identity);
+        roomRef.boxOpened();
         
         }
         //Create an istance of a random prefab from the array
@@ -110,7 +117,7 @@ private void openBox()
 
 
         //destry this
-        roomRef.boxOpened();
+        this.gameObject.SetActive(false);
         Destroy(this.gameObject);
     }
 public void enableBox()

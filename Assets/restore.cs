@@ -59,7 +59,7 @@ public class restore : MonoBehaviour
         {
             cameraRot = user.transform.rotation;
             print("CAMERA CHANBGED");
-            if (!currentRoom.isRestored)
+            if (!currentRoom.IsRestored())
             {
                 currentRoom.checkNewWallsToMove();
                 ArrayList log = currentRoom.getLog();
