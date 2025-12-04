@@ -11,6 +11,7 @@ public class wall : MonoBehaviour
     public Vector3 orientation;
     public GameObject DarkScreen;
      public List<GameObject> attached;
+     private int timesMoved = 0;
     
 
     public bool isVisible = true;
@@ -93,8 +94,20 @@ public class wall : MonoBehaviour
         {
             a.transform.position -= dir;
         }
+        
     }
-    
+    public int getTimesMoved()
+    {
+        return timesMoved;
+    }
+    public void resetTimesMoved()
+    {
+        timesMoved = 0;
+    }
+    public void incrementTimesMoved()
+    {
+        timesMoved += 1;
+    }
     public void fillRoom(Vector3 direction) {
         Vector3 movevector;
         float scaleCoficient;

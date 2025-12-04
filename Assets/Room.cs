@@ -71,7 +71,7 @@ public bool triggered = false;
             {
                 
                 leftWall = wScript;
-                zlen = wScript.getOriginalScale();
+                
                 initialZlen = wScript.getScale();
                 
             }
@@ -81,7 +81,7 @@ public bool triggered = false;
 
                 if (orientation.z > 0.5)
                 {
-                    
+                    zlen = wScript.getOriginalScale();
                     upWall = wScript;
                     
                 }
@@ -177,6 +177,9 @@ public void moveWalls(Vector3 dir)
             }
         
         }
+        
+    
+
     
 }
 
@@ -184,6 +187,8 @@ private void actuallyMoveWall(wall w, Vector3 moveDir, Vector3 orientation )
 {
                 Vector3 pastPos = w.getPosition();
                 w.moveWall(moveDir);
+                w.incrementTimesMoved();
+                oposite[w].resetTimesMoved();
                 
                 Vector3 newPos = w.getPosition();
                 Vector3 opositePosition = oposite[w].getPosition();
@@ -209,6 +214,11 @@ private void actuallyMoveWall(wall w, Vector3 moveDir, Vector3 orientation )
 }
 private bool CanMove(wall w, Vector3 dir)
 {
+    if (w.getTimesMoved() >= 3)
+    {
+        log.Add("Wall has moved maximum times");
+        return false;
+    }
     
     Vector3 newPos = w.getPosition() - dir;
 
@@ -220,7 +230,14 @@ private bool CanMove(wall w, Vector3 dir)
 
     
     
+   //caklculate
    float area = w.getScale() * dif.magnitude ;
+   log.Add("Current area: ");
+    log.Add(area );
+    log.Add("Real area: ");
+    log.Add(realArea);
+    log.Add("Room center magnitude: ");
+    log.Add( getCenter().magnitude);
    if(area>= (realArea-0.061f) && area <= (realArea+0.061f) && getCenter().magnitude <0.1f)
       {
         log.Add("Room fully restored");
@@ -358,7 +375,7 @@ public void keySpawned()
 private void OnTriggerEnter(Collider other)
     {
         
-        if( !triggered && other.tag == "MainCamera")
+        if( !isRestored && !triggered && other.tag == "MainCamera")
         {
             triggered = true;
             print("TRIGGERED");
@@ -366,6 +383,9 @@ private void OnTriggerEnter(Collider other)
             
             restorer.Entered(this.GetComponent<Room>());
             door1.closeDoor();
+
+            //disable collider
+            
         }
             
         
@@ -373,7 +393,7 @@ private void OnTriggerEnter(Collider other)
 
     private void OnTriggerExit(Collider other)
     {
-        if(triggered && other.tag == "MainCamera")
+        if(isRestored  && triggered && other.tag == "MainCamera")
         {
             triggered = false;
             
